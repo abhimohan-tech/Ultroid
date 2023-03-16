@@ -3,32 +3,30 @@
 
 | Code | Language | Translated | Remaining |
 |----|-------|-------|---|
-| en | English [English] | 413 | 0 |
-| ru | Russian [Русский] | 413 | 0 |
-| id | Indonesia [Indonesia] | 389 | 24 |
-| ar | Arabic [العربية] | 170 | 243 |
-| gu | Gujarati [ગુજરાતી] | 111 | 302 |
-| az | Azerbaijan [Azərbaycan] | 382 | 31 |
-| mr | Marathi [मराठी] | 114 | 299 |
-| hi | Hindi [हिंदी] | 410 | 3 |
-| fa | Persian [Farsi] | 413 | `NEED_TRANSLATION` |
-| my | Malay [Bahasa Melayu] | 114 | 299 |
-| ml | Malayalam [മലയാളം] | 114 | 299 |
-| si | sinhala [සිංහල] | 114 | 299 |
-| jp | Japanese [日本] | 396 | 17 |
-| es | Spanish [Español] | 114 | 299 |
-| bn | bengoli [বাংলা] | 114 | 299 |
-| pt-br | Portuguese [Português] | 114 | 299 |
-| tr | Turkish [Türk] | 114 | 299 |
-| it | Italian [italiano] | 113 | 300 |
-| ta | தமிழ் [தமிழ்] | 114 | 299 |
-| od | Odia [ଓଡିଆ] | 114 | 299 |
-| ka | Kannada [ಕನ್ನಡ] | 114 | 299 |
-| cn | Chinese [简体中文] | 114 | 299 |
+| en | English [English] | 494 | 0 |
+| ar | Arabic [العربية] | 490 | 4 |
+| az | Azerbaijan [Azərbaycan] | 490 | 4 |
+| bn | Bengali [বাংলা] | 490 | 4 |
+| cn | Chinese [简体中文] | 490 | 4 |
+| es | Spanish [Español] | 490 | 4 |
+| fa | Persian [Farsi] | 491 | 3 |
+| fr | French [Français] | 490 | 4 |
+| gu | Gujarati [ગુજરાતી] | 490 | 4 |
+| hi | Hindi [हिंदी] | 489 | 5 |
+| id | Indonesia [Indonesia] | 490 | 4 |
+| it | Italian [italiano] | 490 | 4 |
+| jp | Japanese [日本] | 490 | 4 |
+| ka | Kannada [ಕನ್ನಡ] | 490 | 4 |
+| ml | Malayalam [മലയാളം] | 490 | 4 |
+| mr | Marathi [मराठी] | 491 | 3 |
+| ms | Malay [Bahasa Melayu] | 494 | NULL |
+| or | Odia [ଓଡିଆ] | 490 | 4 |
+| pt-br | Português [Português] | 490 | 4 |
+| ru | Russian [Русский] | 490 | 4 |
+| si | sinhala [සිංහල] | 490 | 4 |
+| ta | தமிழ் [தமிழ்] | 490 | 4 |
+| tr | Turkish [Türk] | 490 | 4 |
+| uz | Uzbekcha [Uzbekcha] | 490 | 4 |
 
-### Note
-- `NEED_TRANSLATION` says, "Translation is half remaining and in that place English Strings are placed, so Translation helper need to check file instead."
 
-- If Strings are not present, Google Translation will be used to Translate them at time of Usage.
-<br><br>
-• Remaining Strings can be found [here](./remaining.csv) for easy sort out.
+If Strings are not present, Google Translation will be used to Translate them at time of Usage.

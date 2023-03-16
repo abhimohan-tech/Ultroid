@@ -11,14 +11,14 @@
     Unsplash Image Search.
 """
 
-from pyUltroid.functions.misc import unsplashsearch
+from pyUltroid.fns.misc import unsplashsearch
 
 from . import asyncio, download_file, get_string, os, ultroid_cmd
 
 
-@ultroid_cmd(pattern="unsplash ?(.*)")
+@ultroid_cmd(pattern="unsplash( (.*)|$)")
 async def searchunsl(ult):
-    match = ult.pattern_match.group(1)
+    match = ult.pattern_match.group(1).strip()
     if not match:
         return await ult.eor("Give me Something to Search")
     num = 5
@@ -30,9 +30,7 @@ async def searchunsl(ult):
     if not res:
         return await ult.eor(get_string("unspl_1"), time=5)
     CL = [download_file(rp, f"{match}-{e}.png") for e, rp in enumerate(res)]
-    imgs = [z for z in (await asyncio.gather(*CL)) if z]
-    await ult.client.send_file(
-        ult.chat_id, imgs, caption=f"Uploaded {len(imgs)} Images!"
-    )
+    imgs = [z[0] for z in (await asyncio.gather(*CL)) if z]
+    await ult.respond(f"Uploaded {len(imgs)} Images!", file=imgs)
     await tep.delete()
     [os.remove(img) for img in imgs]

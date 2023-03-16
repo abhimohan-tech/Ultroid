@@ -24,12 +24,12 @@ from . import get_string, ultroid_cmd
 
 
 @ultroid_cmd(
-    pattern="poll ?(.*)",
+    pattern="poll( (.*)|$)",
 )
 async def uri_poll(e):
     if not e.client._bot and e.is_private:
         return await e.eor("`Use this in Group/Channel.`", time=15)
-    match = e.pattern_match.group(1)
+    match = e.pattern_match.group(1).strip()
     if not match:
         return await e.eor("`Give Proper Input...`", time=5)
     if ";" not in match:
@@ -58,9 +58,8 @@ async def uri_poll(e):
         return await e.eor("`Options Should be More than 1..`", time=5)
     m = await e.eor(get_string("com_1"))
     OUT = [PollAnswer(option[on], str(on).encode()) for on in range(len(option))]
-    await e.client.send_file(
-        e.chat_id,
-        InputMediaPoll(
+    await e.respond(
+        file=InputMediaPoll(
             Poll(20, ques, OUT, multiple_choice=mpp, public_voters=publ, quiz=quizo),
             correct_answers=karzo,
         ),

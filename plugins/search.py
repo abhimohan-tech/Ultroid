@@ -24,7 +24,6 @@
     Reply an Image or sticker to find its sauce.
 """
 import os
-from shutil import rmtree
 
 import requests
 from bs4 import BeautifulSoup as bs
@@ -33,19 +32,23 @@ try:
     from PIL import Image
 except ImportError:
     Image = None
-from pyUltroid.functions.google_image import googleimagesdownload
-from pyUltroid.functions.misc import google_search
-from pyUltroid.functions.tools import saavn_search
+try:
+    import cv2
+except ImportError:
+    cv2 = None
 from telethon.tl.types import DocumentAttributeAudio
 
-from . import async_searcher, eod, fast_download, get_string, ultroid_cmd
+from pyUltroid.fns.misc import google_search
+from pyUltroid.fns.tools import get_google_images, saavn_search
+
+from . import LOGS, async_searcher, con, eod, fast_download, get_string, ultroid_cmd
 
 
 @ultroid_cmd(
     pattern="github (.*)",
 )
 async def gitsearch(event):
-    usrname = event.pattern_match.group(1)
+    usrname = event.pattern_match.group(1).strip()
     if not usrname:
         return await event.eor(get_string("srch_1"))
     url = f"https://api.github.com/users/{usrname}"
@@ -83,11 +86,11 @@ async def gitsearch(event):
 
 
 @ultroid_cmd(
-    pattern="google ?(.*)",
+    pattern="google( (.*)|$)",
     manager=True,
 )
 async def google(event):
-    inp = event.pattern_match.group(1)
+    inp = event.pattern_match.group(1).strip()
     if not inp:
         return await eod(event, get_string("autopic_1"))
     x = await event.eor(get_string("com_2"))
@@ -104,9 +107,9 @@ async def google(event):
     await x.eor(omk, link_preview=False)
 
 
-@ultroid_cmd(pattern="img ?(.*)")
+@ultroid_cmd(pattern="img( (.*)|$)")
 async def goimg(event):
-    query = event.pattern_match.group(1)
+    query = event.pattern_match.group(1).strip()
     if not query:
         return await event.eor(get_string("autopic_1"))
     nn = await event.eor(get_string("com_1"))
@@ -117,20 +120,12 @@ async def goimg(event):
             query = query.split(";")[0]
         except BaseException:
             pass
-    try:
-        gi = googleimagesdownload()
-        args = {
-            "keywords": query,
-            "limit": lmt,
-            "format": "jpg",
-            "output_directory": "./resources/downloads/",
-        }
-        pth = await gi.download(args)
-        ok = pth[0][query]
-    except BaseException:
-        return await nn.edit(get_string("autopic_2").format(query))
-    await event.reply(file=ok, message=query)
-    rmtree(f"./resources/downloads/{query}/")
+    images = await get_google_images(query)
+    for img in images[:lmt]:
+        try:
+            await event.client.send_file(event.chat_id, file=img["original"])
+        except Exception as er:
+            LOGS.exception(er)
     await nn.delete()
 
 
@@ -141,12 +136,13 @@ async def reverse(event):
         return await event.eor("`Reply to an Image`")
     ult = await event.eor(get_string("com_1"))
     dl = await reply.download_media()
-    img = Image.open(dl)
+    file = await con.convert(dl, convert_to="png")
+    img = Image.open(file)
     x, y = img.size
-    file = {"encoded_image": (dl, open(dl, "rb"))}
+    files = {"encoded_image": (file, open(file, "rb"))}
     grs = requests.post(
         "https://www.google.com/searchbyimage/upload",
-        files=file,
+        files=files,
         allow_redirects=False,
     )
     loc = grs.headers.get("Location")
@@ -162,30 +158,24 @@ async def reverse(event):
     link = alls["href"]
     text = alls.text
     await ult.edit(f"`Dimension ~ {x} : {y}`\nSauce ~ [{text}](google.com{link})")
-    gi = googleimagesdownload()
-    args = {
-        "keywords": text,
-        "limit": 2,
-        "format": "jpg",
-        "output_directory": "./resources/downloads/",
-    }
-    pth = await gi.download(args)
-    ok = pth[0][text]
-    await event.client.send_file(
-        event.chat_id,
-        ok,
-        album=True,
-        caption="Similar Images Realted to Search",
-    )
-    rmtree(f"./resources/downloads/{text}/")
-    os.remove(dl)
+    images = await get_google_images(text)
+    for z in images[:2]:
+        try:
+            await event.client.send_file(
+                event.chat_id,
+                file=z["original"],
+                caption="Similar Images Realted to Search",
+            )
+        except Exception as er:
+            LOGS.exception(er)
+    os.remove(file)
 
 
 @ultroid_cmd(
-    pattern="saavn ?(.*)",
+    pattern="saavn( (.*)|$)",
 )
 async def siesace(e):
-    song = e.pattern_match.group(1)
+    song = e.pattern_match.group(1).strip()
     if not song:
         return await e.eor("`Give me Something to Search", time=5)
     eve = await e.eor(f"`Searching for {song} on Saavn...`")
@@ -194,19 +184,19 @@ async def siesace(e):
     except IndexError:
         return await eve.eor(f"`{song} not found on saavn.`")
     try:
-        title = data["song"]
-        url = data["media_url"]
+        title = data["title"]
+        url = data["url"]
         img = data["image"]
         duration = data["duration"]
-        performer = data["primary_artists"]
+        performer = data["artists"]
     except KeyError:
         return await eve.eor("`Something went wrong.`")
-    song, _ = await fast_download(url, filename=title + ".m4a")
-    thumb, _ = await fast_download(img, filename=title + ".jpg")
+    song, _ = await fast_download(url, filename=f"{title}.m4a")
+    thumb, _ = await fast_download(img, filename=f"{title}.jpg")
     song, _ = await e.client.fast_uploader(song, to_delete=True)
-    await e.reply(
+    await eve.eor(
         file=song,
-        message=f"`{title}`\n`From Saavn`",
+        text=f"`{title}`\n`From Saavn`",
         attributes=[
             DocumentAttributeAudio(
                 duration=int(duration),
